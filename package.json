@@ -1,15 +1,13 @@
 {
   "name": "nexasave",
-  "version": "2.0.0",
+  "version": "4.0.0",
   "private": true,
-  "description": "NexaSave glassmorphism video saver web app",
+  "description": "NexaSave — professional video saver with local weather themes",
   "engines": { "node": ">=18" },
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
-  },
+  "scripts": { "start": "node server.js", "dev": "node --watch server.js" },
   "dependencies": {
     "express": "^4.21.2",
-    "helmet": "^8.0.0"
+    "helmet": "^8.0.0",
+    "ipaddr.js": "^2.2.0"
   }
 }
