@@ -1,36 +1,46 @@
-# NexaSave v5 — Social video links + direct media downloader
+# NexaSave v6 — Deployment repair
 
-## What's new in v5
-- Accepts public Facebook, YouTube and TikTok video links using `yt-dlp`.
-- Still supports direct MP4/WebM/MOV and other direct media-file URLs.
-- Downloads one video at a time, with a 512 MB maximum and a 4-minute extraction timeout.
-- Clear Bengali errors for private, unavailable, unsupported or too-large videos.
-- Keeps the glassmorphism UI, weather themes and local file-saving feature.
+## Why this version changes the deployment
+The previous version relied on a Python package installed into a Node runtime's user directory. That can leave the command unavailable at runtime, and modern YouTube extraction also needs a supported JavaScript runtime and the yt-dlp EJS challenge scripts. This version uses Docker so the runtime is deterministic.
 
-## Deploy on GitHub → Render
-1. Extract this ZIP and upload the **contents** to the root of your GitHub repository.
-2. In Render choose **New + → Blueprint**, connect the repository and deploy `render.yaml`.
-3. Render build installs `yt-dlp` from `requirements.txt`, then runs `npm install`.
-4. After deployment, open the service URL and test `/health` (should return JSON with status `ok`).
+## Included
+- Node.js 22
+- Python virtual environment at `/opt/venv`
+- Latest `yt-dlp[default]` installed into that virtual environment
+- Node 22 explicitly enabled as yt-dlp's JavaScript runtime
+- `yt-dlp-ejs` support through the default extra
+- FFmpeg for merging separate audio/video streams
+- Direct browser attachment download (does not load the entire 512 MB file into browser JavaScript memory)
+- Public Facebook, TikTok and YouTube links where the current public extractor supports them
+- Direct MP4/WebM/MOV URLs
+- `/health` reports the installed yt-dlp version and whether the downloader is ready
 
-If you already have an existing Render service, push/replace these files in the connected GitHub repository and trigger **Manual Deploy → Clear build cache & deploy**. A fresh build is important so yt-dlp is installed.
+## Update on Render
+1. Extract this ZIP.
+2. Upload/replace all project files in the **root** of the GitHub repository. Make sure `Dockerfile` and `render.yaml` are at the repository root.
+3. In Render, open the existing NexaSave service → Settings. The service must use the **Docker** runtime. If the current service was created as a Node native service, create a new Web Service from this repository and select Docker (a native Node service cannot switch runtime in-place).
+4. Set the Dockerfile path to `./Dockerfile` if asked.
+5. Deploy and wait for the Docker build to finish.
+6. Open `https://YOUR-SERVICE.onrender.com/health`. Expected JSON includes:
+   - `"version":"6.0.0"`
+   - `"socialDownloader":"ready"`
+   - a non-empty `"ytDlpVersion"`
+   - `"nodeVersion":"v22..."`
 
-## Supported and important limitations
-- Publicly accessible Facebook, YouTube and TikTok video URLs are supported where the upstream platform/extractor currently permits access.
-- Direct media-file URLs from other hosts are supported too.
-- Private, age/login-restricted, members-only, DRM-protected or otherwise access-controlled videos are not supported. No login cookies, account credentials, DRM bypass or access-control circumvention are used.
-- Platform changes, regional restrictions, rate limits and anti-bot responses can still make a particular public URL unavailable. This cannot be guaranteed for every post/share link.
-- Download only videos you own or have permission to save, and follow the source platform's terms and applicable law.
-- Maximum output size: 512 MB. Maximum social extraction time: 4 minutes. Render instance memory/disk and plan limits also apply.
+If `/health` says `socialDownloader: "missing"`, the Docker build did not deploy correctly. Do not test video links until it says `ready`.
+
+## Notes and limitations
+- Supports public video links only, where platform extraction is currently permitted and available.
+- Facebook share URLs may resolve differently by region or post privacy. TikTok short links may redirect to the canonical post. Platform anti-bot/rate limits, geo restrictions and extractor changes can still block individual posts.
+- Does not use account cookies, credentials, DRM bypass, or private-content access.
+- Videos requiring login, age verification, membership or other access controls are not supported.
+- Maximum output size is 512 MB; social extraction timeout is 6 minutes. Render free-tier resource and request limits may interrupt large/long downloads.
+- Download only content you own or have permission to save and follow platform terms and applicable law.
 
 ## Local run
-Install Python 3 and Node.js 18+, then:
+Docker is recommended:
 ```bash
-python3 -m pip install --user -r requirements.txt
-npm install
-npm start
+docker build -t nexasave .
+docker run -p 10000:10000 nexasave
 ```
-Open `http://localhost:10000`.
-
-## Weather privacy
-Weather uses Open-Meteo from the visitor's browser. Location permission is requested by the browser; coordinates are not sent to the NexaSave backend.
+Then open `http://localhost:10000`.

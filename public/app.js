@@ -16,48 +16,28 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-async function downloadDirectUrl() {
+function downloadDirectUrl() {
   const raw = $("#videoUrl").value.trim();
-  if (!raw) return setStatus("প্রথমে ভিডিওর সরাসরি লিংক পেস্ট করুন।", true);
+  if (!raw) return setStatus("প্রথমে ভিডিওর লিংক পেস্ট করুন।", true);
   let parsed;
   try { parsed = new URL(raw); } catch { return setStatus("সঠিক ভিডিও URL দিন।", true); }
   if (!["http:", "https:"].includes(parsed.protocol)) return setStatus("শুধু HTTP বা HTTPS লিংক ব্যবহার করুন।", true);
 
   const button = $("#downloadBtn");
   button.disabled = true;
-  button.textContent = "Preparing video…";
-  setStatus("ভিডিও লিংক পরীক্ষা করা হচ্ছে। পাবলিক ভিডিও হলে ডাউনলোড প্রস্তুত হবে…");
-  try {
-    const endpoint = `/api/download?url=${encodeURIComponent(raw)}`;
-    const response = await fetch(endpoint, { method: "GET" });
-    const contentType = response.headers.get("content-type") || "";
-    if (!response.ok || contentType.includes("application/json")) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || `ডাউনলোড করা যায়নি (HTTP ${response.status})।`);
-    }
-    if (!contentType.toLowerCase().startsWith("video/") && !contentType.toLowerCase().includes("octet-stream")) {
-      throw new Error("এই লিংক থেকে ভিডিও ফাইল পাওয়া যায়নি। সরাসরি ভিডিও URL অথবা সমর্থিত পাবলিক সোশ্যাল ভিডিও লিংক দিন।");
-    }
-    const blob = await response.blob();
-    if (!blob.size) throw new Error("ভিডিও ফাইলটি খালি বা পাওয়া যায়নি।");
-    const disposition = response.headers.get("content-disposition") || "";
-    const match = disposition.match(/filename="([^"]+)"/i);
-    const filename = match ? match[1] : "nexasave-video";
-    const objectUrl = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = objectUrl;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-    setStatus(`ডাউনলোড শুরু হয়েছে: ${filename}`);
-  } catch (error) {
-    setStatus(error.message || "ডাউনলোড করা যায়নি। লিংকটি পরীক্ষা করুন।", true);
-  } finally {
+  button.textContent = "Starting download…";
+  setStatus("সার্ভার ভিডিও প্রস্তুত করছে। ডাউনলোড শুরু হলে ব্রাউজারের Downloads-এ দেখাবে…");
+
+  // Navigate directly to the attachment endpoint. This lets the browser stream
+  // large files to Downloads instead of buffering the complete video in RAM.
+  const endpoint = `/api/download?url=${encodeURIComponent(raw)}`;
+  window.location.assign(endpoint);
+
+  // Re-enable the button after the browser has begun navigating.
+  setTimeout(() => {
     button.disabled = false;
     button.innerHTML = 'Save video <b>↓</b>';
-  }
+  }, 2500);
 }
 $("#downloadBtn").addEventListener("click", downloadDirectUrl);
 $("#videoUrl").addEventListener("keydown", event => {

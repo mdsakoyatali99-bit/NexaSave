@@ -1,10 +1,10 @@
 {
   "name": "nexasave",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "private": true,
-  "description": "NexaSave \u2014 public social video and direct media downloader with weather themes",
+  "description": "NexaSave \u2014 Docker-based public social video and direct media downloader",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "scripts": {
     "start": "node server.js",
