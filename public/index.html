@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b18">
+<meta name="description" content="NexaSave — a weather-aware, glassmorphism video saver for files you are allowed to download.">
+<title>NexaSave — Save the moments</title>
+<link rel="icon" href="/assets/nexasave-mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="bg-grid"></div><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="orb orb-three"></div>
+<header class="nav glass">
+  <a class="brand" href="#"><img src="/assets/nexasave-mark.svg" alt=""><span>Nexa<span>Save</span></span></a>
+  <nav><a href="#features">Features</a><a href="#how">How it works</a><a href="#faq">FAQ</a><span class="online"><i></i> All systems normal</span></nav>
+  <button class="menu" aria-label="Toggle menu">☰</button>
+</header>
+<main>
+<section class="hero">
+  <div class="badge"><span>✦</span> THE SIMPLE WAY TO SAVE MEDIA</div>
+  <h1>Your videos.<br><em>Your moments.</em></h1>
+  <p class="lead">A beautiful, simple space to save video files you own or have permission to download — with a live atmosphere that adapts to your local weather.</p>
+  <section class="weather-card glass" aria-label="Local weather">
+    <div class="weather-main">
+      <div class="weather-location"><span class="weather-pin">⌖</span><span id="weatherLocation">Checking your local weather…</span><button id="refreshWeather" class="refresh-weather" aria-label="Refresh weather">↻</button></div>
+      <div class="weather-reading"><span id="weatherIcon" class="weather-icon">🌤️</span><span id="weatherTemp">--°</span><span id="weatherUnit">C</span></div>
+      <div id="weatherDescription" class="weather-description">Allow location access for current conditions</div>
+    </div>
+    <div class="weather-details">
+      <div><span>FEELS LIKE</span><strong id="feelsLike">--°</strong></div>
+      <div><span>HUMIDITY</span><strong id="humidity">--%</strong></div>
+      <div><span>WIND</span><strong id="wind">-- km/h</strong></div>
+      <div><span>RAIN</span><strong id="rain">-- mm</strong></div>
+    </div>
+    <div class="weather-bottom">
+      <span id="weatherUpdated">Weather powered by Open-Meteo</span>
+      <button id="changeLocation" class="location-button">Change location</button>
+    </div>
+    <form id="locationForm" class="location-form hidden">
+      <input id="locationSearch" type="search" placeholder="Search city, e.g. Dhaka" aria-label="Search city">
+      <button type="submit">Find</button>
+      <button type="button" id="cancelLocation" class="cancel-location">Cancel</button>
+    </form>
+    <div id="locationResults" class="location-results hidden"></div>
+  </section>
+  <div class="workspace glass">
+    <div class="workspace-top"><div class="window-dots"><b></b><b></b><b></b></div><span>QUICK SAVE WORKSPACE</span><span class="secure">⌑ PRIVATE BY DESIGN</span></div>
+    <div class="tabs"><button class="tab active" data-tab="link"> <span>↗</span> Video URL</button><button class="tab" data-tab="file"><span>↑</span> Your device</button></div>
+    <div id="linkPane">
+      <label for="videoUrl">PASTE A DIRECT VIDEO FILE URL</label>
+      <div class="urlbox"><span class="url-symbol">⌁</span><input id="videoUrl" type="url" placeholder="https://example.com/video.mp4" autocomplete="url"><button id="downloadBtn" class="action">Save video <b>↓</b></button></div>
+      <div class="micro"><span>✧</span> Supports direct MP4, WebM, MOV, M4V and OGV file links.</div>
+    </div>
+    <div id="filePane" class="hidden">
+      <label for="fileInput">SELECT A VIDEO FROM YOUR DEVICE</label>
+      <label class="dropzone" for="fileInput"><span class="upload">↑</span><strong>Drop your video here or <u>browse files</u></strong><small>MP4 · WebM · MOV · Your file stays on this device</small></label>
+      <input id="fileInput" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" hidden>
+      <div id="fileInfo" class="file-info hidden"></div>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </div>
+  <div class="trustline"><span>✧</span> No account required <i></i> Browser-based local file handling <i></i> Original file quality</div>
+  <div class="platform-warning">Platform share links from TikTok, YouTube or Facebook are not direct video-file URLs. Use official download options or authorized integrations, and only save content you have rights to.</div>
+</section>
+<section class="features" id="features">
+  <div class="section-head"><span>WHY NEXASAVE</span><h2>Less friction. <em>More moments.</em></h2><p>Everything you need for a straightforward, responsible save workflow.</p></div>
+  <div class="feature-grid">
+    <article class="feature glass"><div class="icon violet">↯</div><h3>Effortlessly simple</h3><p>Paste a direct file link or choose a video from your own device. No complicated workflow.</p><span class="card-glow"></span></article>
+    <article class="feature glass"><div class="icon cyan">◇</div><h3>Original quality</h3><p>No transcoding or compression. Direct files are saved as provided by the source.</p><span class="card-glow"></span></article>
+    <article class="feature glass"><div class="icon mint">⌑</div><h3>Privacy-minded</h3><p>Your local video is handled in your browser and is never uploaded to this server.</p><span class="card-glow"></span></article>
+  </div>
+</section>
+<section class="how" id="how"><div class="section-head"><span>THREE EASY STEPS</span><h2>Ready when <em>you are.</em></h2></div>
+<div class="steps"><div class="step glass"><b>01</b><h3>Choose your source</h3><p>Paste a direct video-file URL or switch to the device tab.</p></div><div class="step glass"><b>02</b><h3>Start saving</h3><p>Use the save action and let your browser handle the file.</p></div><div class="step glass"><b>03</b><h3>Keep the moment</h3><p>Find the saved video in your browser's normal download location.</p></div></div></section>
+<section class="faq" id="faq"><div class="section-head"><span>THE DETAILS</span><h2>Questions, <em>answered.</em></h2></div>
+<div class="faq-list">
+<details class="glass"><summary>Can I paste a TikTok, YouTube or Facebook share link?</summary><p>This starter version does not extract videos from platform share pages. Platform-specific support requires official or otherwise authorized integrations and must follow each platform's terms and copyright rules.</p></details>
+<details class="glass"><summary>Why might a direct link not download?</summary><p>The host may block cross-origin downloads, require authentication, or stream the media in a way that is not exposed as a direct file. Use the source website's official download option.</p></details>
+<details class="glass"><summary>Do you upload my selected video?</summary><p>No. When you choose a local file, the browser creates a local download. The file is not sent to the NexaSave server.</p></details>
+</div></section>
+</main>
+<footer><a class="brand" href="#"><img src="/assets/nexasave-mark.svg" alt=""><span>Nexa<span>Save</span></span></a><p>Save responsibly. Respect creators. <span>© <b id="year"></b> NexaSave</span></p></footer>
+<script src="/weather.js"></script><script src="/app.js"></script>
+</body></html>
