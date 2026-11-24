@@ -25,18 +25,18 @@ async function downloadDirectUrl() {
 
   const button = $("#downloadBtn");
   button.disabled = true;
-  button.textContent = "Checking link…";
-  setStatus("লিংক পরীক্ষা করা হচ্ছে। ভিডিও ফাইল হলে ডাউনলোড শুরু হবে…");
+  button.textContent = "Preparing video…";
+  setStatus("ভিডিও লিংক পরীক্ষা করা হচ্ছে। পাবলিক ভিডিও হলে ডাউনলোড প্রস্তুত হবে…");
   try {
     const endpoint = `/api/download?url=${encodeURIComponent(raw)}`;
     const response = await fetch(endpoint, { method: "GET" });
     const contentType = response.headers.get("content-type") || "";
     if (!response.ok || contentType.includes("application/json")) {
       const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || `Download failed (HTTP ${response.status}).`);
+      throw new Error(data.error || `ডাউনলোড করা যায়নি (HTTP ${response.status})।`);
     }
     if (!contentType.toLowerCase().startsWith("video/") && !contentType.toLowerCase().includes("octet-stream")) {
-      throw new Error("এই লিংক থেকে ভিডিও ফাইল পাওয়া যায়নি। Direct MP4/WebM/MOV URL দিন।");
+      throw new Error("এই লিংক থেকে ভিডিও ফাইল পাওয়া যায়নি। সরাসরি ভিডিও URL অথবা সমর্থিত পাবলিক সোশ্যাল ভিডিও লিংক দিন।");
     }
     const blob = await response.blob();
     if (!blob.size) throw new Error("ভিডিও ফাইলটি খালি বা পাওয়া যায়নি।");

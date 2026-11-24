@@ -3,7 +3,7 @@ services:
     name: nexasave
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: python3 -m pip install --user -r requirements.txt && npm install
     startCommand: npm start
     healthCheckPath: /health
     autoDeploy: true

@@ -1,10 +1,15 @@
 {
   "name": "nexasave",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
-  "description": "NexaSave — professional video saver with local weather themes",
-  "engines": { "node": ">=18" },
-  "scripts": { "start": "node server.js", "dev": "node --watch server.js" },
+  "description": "NexaSave \u2014 public social video and direct media downloader with weather themes",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
   "dependencies": {
     "express": "^4.21.2",
     "helmet": "^8.0.0",
