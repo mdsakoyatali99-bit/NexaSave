@@ -30,8 +30,9 @@ function downloadDirectUrl() {
 
   // Navigate directly to the attachment endpoint. This lets the browser stream
   // large files to Downloads instead of buffering the complete video in RAM.
-  const endpoint = `/api/download?url=${encodeURIComponent(raw)}`;
-  window.location.assign(endpoint);
+  const endpoint = new URL("/api/download", window.location.origin);
+  endpoint.searchParams.set("url", raw);
+  window.location.assign(endpoint.toString());
 
   // Re-enable the button after the browser has begun navigating.
   setTimeout(() => {

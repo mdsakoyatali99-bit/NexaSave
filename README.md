@@ -1,46 +1,25 @@
-# NexaSave v6 — Deployment repair
+# NexaSave v6.1 — Render routing and download diagnostics
 
-## Why this version changes the deployment
-The previous version relied on a Python package installed into a Node runtime's user directory. That can leave the command unavailable at runtime, and modern YouTube extraction also needs a supported JavaScript runtime and the yt-dlp EJS challenge scripts. This version uses Docker so the runtime is deterministic.
+## What this patch fixes
+- Adds an explicit `/` homepage route and serves `public/index.html` directly.
+- Serves static assets before API routing.
+- Adds clear JSON 404 diagnostics for unknown `/api/*` endpoints.
+- Adds `/health` diagnostics for homepage/static files and yt-dlp installation.
+- Uses an absolute same-origin download endpoint URL in the frontend.
+- Keeps the Docker-based Python + yt-dlp + Node 22 + FFmpeg downloader setup.
 
-## Included
-- Node.js 22
-- Python virtual environment at `/opt/venv`
-- Latest `yt-dlp[default]` installed into that virtual environment
-- Node 22 explicitly enabled as yt-dlp's JavaScript runtime
-- `yt-dlp-ejs` support through the default extra
-- FFmpeg for merging separate audio/video streams
-- Direct browser attachment download (does not load the entire 512 MB file into browser JavaScript memory)
-- Public Facebook, TikTok and YouTube links where the current public extractor supports them
-- Direct MP4/WebM/MOV URLs
-- `/health` reports the installed yt-dlp version and whether the downloader is ready
+## Required Render deployment setup
+This project uses a Dockerfile. If your existing Render service was created as a Node Native service or Static Site, create a **new Web Service** using the same GitHub repository and choose **Docker** as the runtime. Do not deploy this Docker project as a Static Site or Native Node service.
 
-## Update on Render
-1. Extract this ZIP.
-2. Upload/replace all project files in the **root** of the GitHub repository. Make sure `Dockerfile` and `render.yaml` are at the repository root.
-3. In Render, open the existing NexaSave service → Settings. The service must use the **Docker** runtime. If the current service was created as a Node native service, create a new Web Service from this repository and select Docker (a native Node service cannot switch runtime in-place).
-4. Set the Dockerfile path to `./Dockerfile` if asked.
-5. Deploy and wait for the Docker build to finish.
-6. Open `https://YOUR-SERVICE.onrender.com/health`. Expected JSON includes:
-   - `"version":"6.0.0"`
-   - `"socialDownloader":"ready"`
-   - a non-empty `"ytDlpVersion"`
-   - `"nodeVersion":"v22..."`
+1. Extract ZIP and upload all contents to the GitHub repository root.
+2. Confirm `Dockerfile`, `render.yaml`, `server.js`, `package.json`, and the `public/` folder are at repository root.
+3. Render → New + → Web Service → connect repository → Runtime: Docker.
+4. Dockerfile path: `./Dockerfile`.
+5. Deploy and wait until Render says Live.
+6. Open the service root URL. It should show the NexaSave homepage.
+7. Open `/health`. It should return JSON with `version: 6.0.0`, `socialDownloader: ready`, `homepage: found`, and `staticDirectory: found`.
 
-If `/health` says `socialDownloader: "missing"`, the Docker build did not deploy correctly. Do not test video links until it says `ready`.
+If `/health` works but the homepage is Not Found, check that the correct service URL is being opened and that `public/index.html` was committed. If the old Render service remains active, it may still point at the old build or wrong runtime.
 
-## Notes and limitations
-- Supports public video links only, where platform extraction is currently permitted and available.
-- Facebook share URLs may resolve differently by region or post privacy. TikTok short links may redirect to the canonical post. Platform anti-bot/rate limits, geo restrictions and extractor changes can still block individual posts.
-- Does not use account cookies, credentials, DRM bypass, or private-content access.
-- Videos requiring login, age verification, membership or other access controls are not supported.
-- Maximum output size is 512 MB; social extraction timeout is 6 minutes. Render free-tier resource and request limits may interrupt large/long downloads.
-- Download only content you own or have permission to save and follow platform terms and applicable law.
-
-## Local run
-Docker is recommended:
-```bash
-docker build -t nexasave .
-docker run -p 10000:10000 nexasave
-```
-Then open `http://localhost:10000`.
+## Limits
+Public Facebook, TikTok and YouTube URLs are attempted through yt-dlp where their current public extractors permit access. Private/login-only/DRM-protected videos are not supported. Platform restrictions, rate limits, region blocking and extractor changes can still prevent an individual download. Direct media-file URLs are also supported. Maximum file size is 512 MB and social extraction timeout is 6 minutes.

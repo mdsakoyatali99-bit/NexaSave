@@ -18,6 +18,7 @@ const SOCIAL_TIMEOUT_MS = 6 * 60 * 1000;
 const PYTHON = process.env.PYTHON_PATH || "/opt/venv/bin/python";
 
 app.disable("x-powered-by");
+app.use(express.static(path.join(__dirname, "public"), { maxAge: "1h" }));
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -270,6 +271,17 @@ function safeFilename(url, contentType) {
   return name;
 }
 
+// Explicit homepage route: avoids a plain "Not Found" response if static index
+// resolution differs between Render runtime configurations.
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"), error => {
+    if (error && !res.headersSent) {
+      console.error("Homepage file missing:", error.message);
+      res.status(500).type("text").send("NexaSave homepage is missing from the deployment. Check that public/index.html is committed to GitHub.");
+    }
+  });
+});
+
 app.get("/health", async (_req, res) => {
   const ytDlp = await pythonAvailable();
   res.json({
@@ -278,7 +290,9 @@ app.get("/health", async (_req, res) => {
     version: "6.0.0",
     socialDownloader: ytDlp ? "ready" : "missing",
     ytDlpVersion: ytDlp,
-    nodeVersion: process.version
+    nodeVersion: process.version,
+    homepage: fs.existsSync(path.join(__dirname, "public", "index.html")) ? "found" : "missing",
+    staticDirectory: fs.existsSync(path.join(__dirname, "public")) ? "found" : "missing"
   });
 });
 
@@ -319,5 +333,22 @@ app.get("/api/download", async (req, res) => {
   media.upstream.pipe(res);
 });
 
-app.use(express.static(path.join(__dirname, "public"), { maxAge: "1h" }));
-app.listen(PORT, () => console.log(`NexaSave v6 listening on ${PORT}`));
+app.use("/api", (_req, res) => {
+  res.status(404).json({
+    error: "API endpoint not found.",
+    requestedPath: _req.path,
+    hint: "Use GET /api/download?url=VIDEO_URL or GET /health."
+  });
+});
+
+app.use((_req, res) => {
+  res.status(404).type("text").send("NexaSave: page not found. Open the website homepage or check the requested URL.");
+});
+
+app.use((error, _req, res, _next) => {
+  console.error("Unhandled request error:", error);
+  if (!res.headersSent) res.status(500).json({ error: "Internal server error. Check Render logs." });
+  else res.destroy();
+});
+
+app.listen(PORT, "0.0.0.0", () => console.log(`NexaSave v6.1 listening on ${PORT}`));
